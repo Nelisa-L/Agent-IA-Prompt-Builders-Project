@@ -1,0 +1,16 @@
+[project]
+name = "auditor-agent"
+version = "0.1.0"
+description = "Agente auditor de código: linting y seguridad"
+requires-python = ">=3.10"
+readme = "README.md"
+
+[project.scripts]
+auditor-agent = "auditor_agent.main:main"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
