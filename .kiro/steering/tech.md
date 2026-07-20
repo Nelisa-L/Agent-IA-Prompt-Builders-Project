@@ -9,9 +9,26 @@
   `auditor_agent.main:main`).
 
 ## Dependencias
-- `pytest` para tests (ver `requirements.txt`).
-- Sin dependencias externas para el análisis (solo `re` de stdlib), a
-  propósito, para mantener el MVP ligero y fácil de correr en el hackathon.
+- `pytest` para tests.
+- `fastapi`, `uvicorn`, `mangum`, `python-multipart` para la API/demo.
+- `requests` para consumir la API de SonarCloud.
+- `anthropic` para el agente que prioriza/explica hallazgos con Claude.
+- El motor de reglas propio (regex, stdlib) se mantiene sin dependencias
+  para poder correr rápido y offline como primera capa de análisis.
+
+## Integraciones externas
+- **SonarCloud**: análisis estático profundo (bugs, vulnerabilidades, code
+  smells, cobertura). Se dispara vía GitHub Actions
+  (`.github/workflows/sonarcloud.yml`) en cada push/PR. Config en
+  `sonar-project.properties`.
+- **Claude (Anthropic API)**: el `ReviewAgent`
+  (`src/auditor_agent/integrations/review_agent.py`) combina los hallazgos
+  propios + los de SonarCloud y genera un resumen priorizado en lenguaje
+  natural (Crítico / Importante / Menor).
+
+## Variables de entorno necesarias
+- `SONAR_TOKEN`, `SONAR_ORGANIZATION`, `SONAR_PROJECT_KEY`
+- `ANTHROPIC_API_KEY`
 
 ## Testing
 - `pytest` sobre la carpeta `tests/`.

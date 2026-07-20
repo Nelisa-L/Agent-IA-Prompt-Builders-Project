@@ -17,9 +17,14 @@
 - [ ] Agregar `--severity-min` para filtrar hallazgos por severidad mínima.
 - [ ] Agregar exit code != 0 si hay hallazgos `critical` (útil para CI/gates).
 
-## Fase 3: Extensión
-- [ ] Integrar linters reales opcionales (`ruff`, `bandit`) como capa
-      adicional, dejando las reglas propias como fallback sin dependencias.
+## Fase 3: Extensión (integración SonarCloud + agente LLM)
+- [x] Configurar SonarCloud (`sonar-project.properties` + workflow de CI).
+- [x] Cliente Python para leer issues de SonarCloud (`sonarcloud_client.py`).
+- [x] `ReviewAgent`: combina hallazgos propios + SonarCloud y genera resumen
+      priorizado (Crítico/Importante/Menor) usando Claude.
+- [x] Endpoint `/review` en la API para exponer este flujo como demo.
+- [ ] Conectar el resultado del `ReviewAgent` como comentario automático en
+      el PR de GitHub (usar `GITHUB_TOKEN` + API de comentarios de PR).
 - [ ] Soporte para `.gitignore`/exclusión de carpetas (`venv/`, `node_modules/`).
 - [ ] Reporte HTML simple para mostrar en la demo del hackathon.
 

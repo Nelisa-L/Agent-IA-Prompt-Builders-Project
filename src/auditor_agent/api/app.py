@@ -15,6 +15,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from auditor_agent.analyzer import CodeAuditor
 from auditor_agent.report import ReportGenerator
+from auditor_agent.integrations.sonarcloud_client import SonarCloudClient
+from auditor_agent.integrations.review_agent import ReviewAgent
 
 app = FastAPI(
     title="Auditor-Agent API",
@@ -60,3 +62,29 @@ async def audit_code(file: UploadFile = File(...)) -> dict:
             ],
             "report_markdown": report._to_markdown(),
         }
+
+
+@app.get("/review")
+def review_project() -> dict:
+    """Combina hallazgos propios + SonarCloud y devuelve un resumen del LLM.
+
+    Requiere las variables de entorno:
+    - SONAR_TOKEN, SONAR_ORGANIZATION, SONAR_PROJECT_KEY
+    - ANTHROPIC_API_KEY
+    """
+    import os
+
+    sonar = SonarCloudClient(
+        token=os.environ["SONAR_TOKEN"],
+        organization=os.environ["SONAR_ORGANIZATION"],
+        project_key=os.environ["SONAR_PROJECT_KEY"],
+    )
+    sonar_issues = sonar.fetch_issues()
+
+    # En este endpoint de demo no volvemos a correr el analizador propio
+    # sobre todo el repo (requeriría el código fuente montado en Lambda);
+    # se puede combinar con /audit en el flujo real de CI.
+    agent = ReviewAgent()
+    summary = agent.review(own_findings=[], sonar_issues=sonar_issues)
+
+    return {"summary_markdown": summary, "sonar_issues_count": len(sonar_issues)}
